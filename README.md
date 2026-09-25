@@ -2,56 +2,32 @@
 
 > Automatically detect, extract, and repack presentation slides from PDF handouts into clean, readable PDF layouts.
 
-**PDF Slide Repacker** is a Python utility designed for a very common problem: presentation slides that have been exported or printed into PDF handouts containing multiple tiny slides per A4 page, often surrounded by excessive margins, dates, page numbers, headers, or other unwanted content.
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![GitHub](https://img.shields.io/badge/GitHub-NameRami-black?logo=github)](https://github.com/NameRami)
 
-Instead of manually cropping every slide, PDF Slide Repacker detects the slide borders automatically, extracts each slide, and lets you rebuild the presentation into a new PDF with the layout you actually want.
+**PDF Slide Repacker** is a Python utility for recovering presentation slides from PDF handouts where multiple tiny slides have been placed on a single A4 page.
+
+It automatically detects bordered slides, extracts them, removes unnecessary surrounding whitespace and page furniture, and lets you rebuild the document into a cleaner PDF with the layout you actually want.
 
 ---
 
 ## Why this project exists
 
-Many lecture notes, course materials, and presentation handouts are distributed as PDFs where several slides are squeezed onto a single A4 page.
+Lecture notes and course materials are often distributed as PDF handouts where several slides are squeezed onto one page.
 
-A typical source page may look like this:
+A typical page might contain:
 
-```text
-+------------------------------------------------------+
-|                                           25/09/2026 |
-|                                                      |
-|    +----------------+    +----------------+          |
-|    |                |    |                |          |
-|    |    Slide 1     |    |    Slide 2     |          |
-|    |                |    |                |          |
-|    +----------------+    +----------------+          |
-|                                                      |
-|    +----------------+    +----------------+          |
-|    |                |    |                |          |
-|    |    Slide 3     |    |    Slide 4     |          |
-|    |                |    |                |          |
-|    +----------------+    +----------------+          |
-|                                                      |
-|    +----------------+    +----------------+          |
-|    |                |    |                |          |
-|    |    Slide 5     |    |    Slide 6     |          |
-|    |                |    |                |          |
-|    +----------------+    +----------------+          |
-|                                                   12 |
-+------------------------------------------------------+
-```
+- 6 tiny slides
+- excessive white margins
+- dates
+- page numbers
+- headers or footers
+- partially filled slide grids
 
-The slides themselves may occupy only a fraction of the page.
+That makes the document harder to read and awkward to print or study from.
 
-PDF Slide Repacker turns that into individually detected slides and lets you reconstruct the document using layouts such as:
-
-```text
-1 slide per page
-2 slides per page
-4 slides per page
-6 slides per page
-...
-```
-
-with your preferred A4 orientation and spacing.
+**PDF Slide Repacker** solves that by detecting the actual slide rectangles and rebuilding the document around them.
 
 ---
 
@@ -59,29 +35,29 @@ with your preferred A4 orientation and spacing.
 
 ### Automatic slide detection
 
-The program analyzes every PDF page and detects large rectangular slide borders using OpenCV.
+The program detects slides by analyzing their visible rectangular borders.
 
-It does **not** rely on a fixed 2x3 grid.
+It does **not** rely on a fixed 2×3 grid, so it can handle pages containing different numbers of slides.
 
-This means it can handle pages containing:
+The detector includes:
 
-- 6 slides
-- 4 slides
-- 2 slides
-- partially filled pages
-- different slide positions
-- extra text outside the slides
+- dark-border detection
+- contour filtering
+- duplicate suppression
+- nested rectangle rejection
+- size consistency checks
+- reading-order sorting
 
-The detector also includes protection against false detections caused by large rectangular objects *inside* a slide.
+This helps prevent large boxes or diagrams inside a slide from being incorrectly detected as separate slides.
 
 ---
 
 ### Extract individual slides
 
-Every detected slide can be exported as a separate image:
+Detected slides can be exported as PNG files:
 
 ```text
-course_slides/
+lecture_slides/
 ├── slide_0001.png
 ├── slide_0002.png
 ├── slide_0003.png
@@ -94,19 +70,17 @@ This is useful for:
 - studying slides individually
 - importing them into note-taking software
 - rebuilding presentations
-- image processing
 - OCR workflows
-- creating new PDFs
+- image processing
+- archiving
 
 ---
 
 ### Repack slides into a new PDF
 
-Extracted slides can be placed into a fresh A4 PDF.
+You can rebuild the extracted slides into a fresh A4 PDF.
 
-You choose how many slides should appear on each page.
-
-Supported values include:
+Choose how many slides should appear on each page:
 
 ```text
 1
@@ -116,14 +90,14 @@ Supported values include:
 5
 6
 ...
-up to 12 slides per page
+up to 12
 ```
 
 ---
 
 ### Portrait, landscape, or automatic orientation
 
-You can explicitly choose:
+Choose:
 
 ```text
 Portrait
@@ -131,21 +105,21 @@ Landscape
 Auto
 ```
 
-In **Auto** mode, the program compares both A4 orientations and selects the one that allows the slides to be displayed larger.
+In **Auto** mode, the program selects the A4 orientation that allows the slides to appear larger.
 
 ---
 
 ### Custom spacing between slides
 
-The distance between slides can be configured in millimeters.
+You can control the gap between neighboring slides in millimeters.
 
 Examples:
 
 ```text
 0 mm    maximum slide size
-2 mm    very compact
+2 mm    compact
 4 mm    default
-8 mm    wider separation
+8 mm    wider spacing
 ```
 
 Decimal values are supported:
@@ -154,7 +128,7 @@ Decimal values are supported:
 2.5
 ```
 
-and comma decimal notation also works:
+and comma decimal notation works too:
 
 ```text
 2,5
@@ -162,20 +136,23 @@ and comma decimal notation also works:
 
 ---
 
-### Process one PDF or an entire folder
+### Process one PDF or every PDF in the folder
 
-The program can operate on:
+The program supports:
 
-- one selected PDF
-- all source PDFs in the current folder
+- processing one selected PDF
+- processing all source PDFs in the script folder
 
-Generated PDFs are automatically ignored when batch processing, preventing accidental recursive processing.
+Generated output PDFs are ignored during batch processing so they are not accidentally processed again.
 
 ---
 
-### Dedicated output folders
+### Output to a dedicated subfolder
 
-Output files can either be saved beside the source PDFs or inside a custom subfolder.
+You can save generated files:
+
+- beside the source PDFs
+- or inside a custom subfolder
 
 Example:
 
@@ -193,13 +170,11 @@ Course PDFs/
 
 ---
 
-### Interactive mode
+### Fully interactive mode
 
 No command-line arguments need to be memorized.
 
-Run the Python file directly from IDLE, VS Code, PyCharm, a terminal, or another Python environment.
-
-The program presents an interactive menu:
+Run the script and follow the menu:
 
 ```text
 ========================================================================
@@ -214,13 +189,21 @@ What do you want to do?
   4. Exit
 ```
 
-The program then guides you through each setting.
+The program then asks for:
+
+- which PDF to process
+- one PDF or all PDFs
+- output location
+- slides per page
+- page orientation
+- slide spacing
+- rendering DPI
+- debug output
+- custom output filename
 
 ---
 
 ## Workflow
-
-PDF Slide Repacker follows this pipeline:
 
 ```text
 Original PDF
@@ -254,135 +237,21 @@ New clean PDF
 
 ---
 
-## Detection strategy
-
-The slide detector uses several techniques together rather than relying on one simple contour search.
-
-### 1. PDF rendering
-
-Each page is rendered at a configurable DPI using **PyMuPDF**.
-
-Higher rendering resolutions can improve border detection.
-
-Default:
-
-```text
-180 DPI
-```
-
----
-
-### 2. Grayscale conversion
-
-Rendered pages are converted to grayscale so that dark borders can be isolated efficiently.
-
----
-
-### 3. Dark-pixel thresholding
-
-Dark lines are converted into a binary mask.
-
-This makes black or dark slide borders stand out from the page background.
-
----
-
-### 4. Morphological processing
-
-Horizontal and vertical OpenCV kernels reconnect small breaks in slide borders.
-
-This improves detection when PDF rendering produces imperfect or interrupted lines.
-
----
-
-### 5. Contour detection
-
-Large rectangular contours are identified and filtered according to:
-
-- page-relative area
-- width
-- height
-- aspect ratio
-- rectangularity
-
----
-
-### 6. Duplicate suppression
-
-Borders often generate both an inner and outer contour.
-
-Intersection-over-union filtering removes duplicate detections.
-
----
-
-### 7. Nested rectangle rejection
-
-Some slides contain large internal rectangles, tables, diagrams, or text boxes.
-
-If a smaller candidate is almost completely contained inside a larger valid slide candidate, the smaller candidate is rejected.
-
-This prevents one slide from accidentally being detected as two.
-
----
-
-### 8. Page-level consistency checking
-
-Slides on the same handout page normally have similar dimensions.
-
-The detector compares candidates against the median slide width and height and removes strong size outliers.
-
----
-
-### 9. Reading-order sorting
-
-Detected slides are arranged from:
-
-```text
-top → bottom
-left → right
-```
-
-before being exported.
-
----
-
-## Requirements
-
-- Python 3.10+ recommended
-- Windows, Linux, or macOS
-- PyMuPDF
-- OpenCV
-- NumPy
-- Pillow
-
-Install dependencies with:
-
-```bash
-python -m pip install pymupdf opencv-python numpy pillow
-```
-
-On systems where Python packages must be installed only for the current user:
-
-```bash
-python -m pip install --user pymupdf opencv-python numpy pillow
-```
-
----
-
 ## Installation
 
 Clone the repository:
 
 ```bash
-git clone https://github.com/YOUR-USERNAME/pdf-slide-repacker.git
+git clone https://github.com/NameRami/PDFSlideRepacker.git
 ```
 
 Enter the project directory:
 
 ```bash
-cd pdf-slide-repacker
+cd PDFSlideRepacker
 ```
 
-Install dependencies:
+Install the dependencies:
 
 ```bash
 python -m pip install -r requirements.txt
@@ -394,22 +263,23 @@ Or install them manually:
 python -m pip install pymupdf opencv-python numpy pillow
 ```
 
----
+If your Python installation requires user-level packages:
 
-## Recommended repository structure
-
-```text
-pdf-slide-repacker/
-├── pdf_slide_repacker.py
-├── README.md
-├── requirements.txt
-├── LICENSE
-├── .gitignore
-└── examples/
-    └── README.md
+```bash
+python -m pip install --user pymupdf opencv-python numpy pillow
 ```
 
-A minimal `requirements.txt` can contain:
+---
+
+## Requirements
+
+- Python 3.10+
+- PyMuPDF
+- OpenCV
+- NumPy
+- Pillow
+
+`requirements.txt`:
 
 ```text
 PyMuPDF
@@ -422,9 +292,37 @@ Pillow
 
 ## Usage
 
-### Interactive usage
+### Option 1 — Run from IDLE
 
-Place the Python script in the same folder as your PDFs:
+Open:
+
+```text
+pdf_slide_repacker.py
+```
+
+Then press:
+
+```text
+F5
+```
+
+The interactive menu will appear.
+
+---
+
+### Option 2 — Run from a terminal
+
+```bash
+python pdf_slide_repacker.py
+```
+
+The same interactive menu will appear.
+
+---
+
+## Recommended folder setup
+
+Place the script and your source PDFs together:
 
 ```text
 My Course/
@@ -434,19 +332,7 @@ My Course/
 └── lecture_03.pdf
 ```
 
-Run:
-
-```bash
-python pdf_slide_repacker.py
-```
-
-Or open the file in Python IDLE and press:
-
-```text
-F5
-```
-
-The program will guide you through the process.
+Then run the script.
 
 ---
 
@@ -454,9 +340,9 @@ The program will guide you through the process.
 
 ### 1. Extract slides only
 
-Detects and exports each slide as an individual image.
+Extracts every detected slide as an individual image.
 
-Example output:
+Example:
 
 ```text
 lecture_01_slides/
@@ -470,11 +356,11 @@ lecture_01_slides/
 
 ### 2. Merge already-extracted slides
 
-Uses an existing `*_slides` folder and builds a new PDF.
+Reuses an existing `*_slides` directory.
 
-This is useful when experimenting with different layouts because slide detection does not have to run again.
+This is useful when experimenting with several output layouts without repeating slide detection.
 
-For example, you can create:
+For example:
 
 ```text
 2 slides / portrait
@@ -482,13 +368,11 @@ For example, you can create:
 6 slides / portrait
 ```
 
-from the same extracted slide set.
-
 ---
 
 ### 3. Extract and merge
 
-Runs the complete process automatically:
+Runs the full workflow:
 
 ```text
 PDF
@@ -504,26 +388,111 @@ Custom output PDF
 
 ---
 
+## Detection strategy
+
+PDF Slide Repacker uses several image-processing stages.
+
+### 1. PDF rendering
+
+Each PDF page is rendered at a configurable DPI using **PyMuPDF**.
+
+Default:
+
+```text
+180 DPI
+```
+
+Higher values may improve detection on difficult PDFs.
+
+---
+
+### 2. Grayscale conversion
+
+Rendered pages are converted to grayscale.
+
+---
+
+### 3. Dark-pixel thresholding
+
+Dark lines are isolated so slide borders stand out from the background.
+
+---
+
+### 4. Morphological processing
+
+OpenCV horizontal and vertical kernels reconnect small gaps in borders.
+
+---
+
+### 5. Contour detection
+
+Large rectangular contours are filtered using:
+
+- page-relative area
+- width
+- height
+- aspect ratio
+- rectangularity
+
+---
+
+### 6. Duplicate suppression
+
+Inner and outer edges of the same slide border can create duplicate contours.
+
+Intersection-over-union filtering removes those duplicates.
+
+---
+
+### 7. Nested rectangle rejection
+
+Large boxes, diagrams, or content regions inside slides can sometimes look like separate slide rectangles.
+
+If a smaller candidate is almost entirely inside a larger valid slide candidate, it is rejected.
+
+---
+
+### 8. Page-level consistency checks
+
+Slides on the same page normally have similar dimensions.
+
+Strong size outliers are filtered out.
+
+---
+
+### 9. Reading-order sorting
+
+Slides are exported in:
+
+```text
+top → bottom
+left → right
+```
+
+order.
+
+---
+
 ## Debug mode
 
-The program can save debug images showing every detected slide rectangle.
+The program can save debug images showing the slide rectangles it detected.
 
 Example:
 
 ```text
-lecture_01_debug/
+lecture_debug/
 ├── page_001_detected.jpg
 ├── page_002_detected.jpg
 └── ...
 ```
 
-These images are useful when adjusting detection parameters for unusual PDFs.
+This is useful when troubleshooting unusual PDFs.
 
 ---
 
 ## Output naming
 
-Automatically generated PDFs follow this pattern:
+Automatically generated PDFs use this pattern:
 
 ```text
 SOURCE_repacked_NUMBERup_ORIENTATION.pdf
@@ -537,65 +506,64 @@ lecture_repacked_4up_landscape.pdf
 lecture_repacked_6up_auto.pdf
 ```
 
-A custom filename can also be entered when processing a single PDF.
+For single-file processing, you can also enter your own filename.
 
 ---
 
 ## Example use cases
 
-PDF Slide Repacker can be useful for:
+PDF Slide Repacker is useful for:
 
 - university lecture handouts
 - PowerPoint printouts
 - training materials
 - conference presentations
 - course PDFs
-- corporate presentation handouts
+- corporate handouts
 - archived slide decks
-- scanned or printed presentation pages
-- rebuilding compact lecture notes into readable slides
+- scanned presentation pages
+- making tiny multi-slide PDFs readable again
 
 ---
 
 ## Known limitations
 
-PDF Slide Repacker currently works best when the original slides have clearly visible rectangular borders.
+The project currently works best when slides have clearly visible rectangular borders.
 
-Detection may require adjustment when:
+Detection may need tuning when:
 
 - slides have no border
 - borders are extremely faint
-- the page background is very dark
+- the page background is dark
 - slides overlap
-- borders are heavily broken
-- scanned pages are strongly rotated
-- the document uses highly irregular layouts
+- scans are heavily rotated
+- layouts are highly irregular
+- borders are severely broken
 
-The detector parameters are intentionally kept near the top of the source code so advanced users can tune them.
+The detection constants are kept near the top of the source code so advanced users can tune them.
 
 ---
 
-## Future ideas
+## Future improvements
 
-Possible future improvements include:
+Possible future features:
 
 - graphical user interface
-- drag-and-drop PDF support
-- PDF preview before processing
+- drag-and-drop support
+- PDF preview
 - visual crop editor
-- automatic border-threshold calibration
+- automatic threshold calibration
 - borderless slide detection
-- deskewing for scanned PDFs
-- OCR-assisted slide detection
-- preserving PDF vector content instead of rasterizing
+- deskewing for scanned pages
+- OCR-assisted detection
+- vector-preserving PDF extraction
 - custom page sizes
 - configurable outer page margins
-- reorder slides before export
-- delete or exclude selected slides
+- slide reordering
+- excluding individual slides
 - Windows standalone `.exe`
 - macOS application bundle
 - Linux package
-- automatic update checker
 
 ---
 
@@ -603,20 +571,25 @@ Possible future improvements include:
 
 PDF Slide Repacker uses:
 
-- **PyMuPDF** for PDF rendering and PDF generation
-- **OpenCV** for border and contour detection
-- **NumPy** for image and geometry processing
-- **Pillow** for image export and image metadata
+- **PyMuPDF** — PDF rendering and PDF creation
+- **OpenCV** — slide-border and contour detection
+- **NumPy** — image and geometry processing
+- **Pillow** — image export and metadata handling
 
 ---
 
-## Philosophy
+## Repository structure
 
-The project is intentionally designed around a simple principle:
-
-> The user should not have to manually crop dozens or hundreds of presentation slides just because the original PDF was exported as a handout.
-
-The tool tries to automate the repetitive work while still giving the user control over the final layout.
+```text
+PDFSlideRepacker/
+├── pdf_slide_repacker.py
+├── README.md
+├── requirements.txt
+├── LICENSE
+├── .gitignore
+└── examples/
+    └── README.md
+```
 
 ---
 
@@ -624,48 +597,52 @@ The tool tries to automate the repetitive work while still giving the user contr
 
 Contributions are welcome.
 
-Ideas, bug reports, improvements, and pull requests are encouraged.
+If you find a PDF that is detected incorrectly, a useful issue report should include:
 
-If you encounter a PDF that is not detected correctly, a useful bug report should ideally include:
-
-- a sample page
-- the expected number of slides
-- the detected number of slides
-- the generated debug image
-- operating system
+- expected number of slides
+- detected number of slides
+- debug image
 - Python version
+- operating system
+- a sample page if you are allowed to share it
 
-Please avoid uploading confidential or copyrighted course material unless you have permission to share it.
+Please do not upload confidential or copyrighted course material unless you have permission to share it.
 
 ---
 
 ## License
 
-A permissive license such as the **MIT License** is a good choice for this project.
+This project is released under the **MIT License**.
 
-If you use MIT, add a `LICENSE` file containing the standard MIT license text and your copyright information.
+See [`LICENSE`](LICENSE) for details.
 
 ---
 
-## Project name
+## Author
 
-**PDF Slide Repacker**
+Created and maintained by **NameRami**.
 
-Suggested GitHub repository name:
+GitHub:
 
-```text
-pdf-slide-repacker
-```
+**https://github.com/NameRami**
 
-Suggested GitHub description:
+Repository:
 
-> Automatically detect, extract, and repack presentation slides from PDF handouts. Supports batch processing, custom A4 layouts, portrait/landscape output, configurable spacing, and interactive operation.
+**https://github.com/NameRami/PDFSlideRepacker**
+
+---
+
+## Project philosophy
+
+> You should not have to manually crop dozens or hundreds of presentation slides just because the original PDF was exported as a handout.
+
+PDF Slide Repacker automates the repetitive work while keeping control over the final layout in the user's hands.
 
 ---
 
 ## Acknowledgements
 
-Built for anyone who has ever opened a lecture PDF, discovered six tiny slides squeezed onto one page with enormous margins, and thought:
+Built for anyone who has ever opened a lecture PDF, discovered six tiny slides squeezed onto a page with huge margins, and thought:
 
 > There has to be a better way.
 
