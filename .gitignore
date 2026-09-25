@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.venv/
+venv/
+
+# IDE/editor files
+.vscode/
+.idea/
+*.swp
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Generated PDF Slide Repacker output
+*_slides/
+*_debug/
+*_extracted.pdf
+*_repacked_*.pdf
+Processed/
+
+# Local test PDFs
+*.pdf
+!examples/*.pdf
